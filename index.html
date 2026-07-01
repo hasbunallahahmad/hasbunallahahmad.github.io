@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hasbun — Backend Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0D1117;
+    --bg-elevated: #131A24;
+    --bg-card: #161D28;
+    --border: #232B38;
+    --text: #E6EDF3;
+    --text-dim: #8B949E;
+    --text-faint: #5A6472;
+    --accent: #FF6B4A;
+    --accent-dim: #FF6B4A33;
+    --cyan: #56D4DD;
+    --green: #4FD68C;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--accent-dim);color:var(--accent);}
+
+  /* background grid texture */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size:64px 64px;
+    opacity:.25;
+    pointer-events:none;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 75%);
+    z-index:0;
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:rgba(13,17,23,.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .logo{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .logo .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .navlinks{display:flex;gap:32px;list-style:none;font-family:var(--mono);font-size:13px;}
+  .navlinks a{color:var(--text-dim);text-decoration:none;transition:color .2s;position:relative;}
+  .navlinks a:hover{color:var(--accent);}
+  .navlinks a::before{content:'./';color:var(--text-faint);}
+  @media (max-width:640px){.navlinks{display:none;}}
+
+  /* ---------- HERO ---------- */
+  header{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding-top:64px;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:var(--mono);font-size:13px;color:var(--cyan);
+    display:flex;align-items:center;gap:10px;margin-bottom:24px;
+    opacity:0;animation:fadeUp .6s ease forwards .1s;
+  }
+  .eyebrow::before{content:'$';color:var(--text-faint);}
+  .terminal-cursor{display:inline-block;width:8px;height:16px;background:var(--cyan);animation:blink 1s step-end infinite;}
+  h1{
+    font-size:clamp(36px,6vw,64px);
+    font-weight:800;letter-spacing:-0.02em;line-height:1.08;
+    margin-bottom:20px;
+    opacity:0;animation:fadeUp .6s ease forwards .25s;
+  }
+  h1 span{color:var(--accent);}
+  .hero-desc{
+    font-size:18px;color:var(--text-dim);max-width:560px;margin-bottom:36px;
+    opacity:0;animation:fadeUp .6s ease forwards .4s;
+  }
+  .hero-desc code{font-family:var(--mono);color:var(--cyan);background:var(--bg-elevated);padding:1px 6px;border-radius:4px;font-size:15px;}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;opacity:0;animation:fadeUp .6s ease forwards .55s;}
+  .btn{
+    font-family:var(--mono);font-size:14px;font-weight:500;
+    padding:12px 22px;border-radius:8px;text-decoration:none;
+    display:inline-flex;align-items:center;gap:8px;
+    transition:transform .2s, box-shadow .2s, background .2s;
+    border:1px solid transparent;
+  }
+  .btn-primary{background:var(--accent);color:#1a0e0a;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--accent-dim);}
+  .btn-ghost{border-color:var(--border);color:var(--text);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- LIFECYCLE DIAGRAM ---------- */
+  .lifecycle{
+    margin-top:64px;
+    opacity:0;animation:fadeUp .8s ease forwards .7s;
+  }
+  .lifecycle-label{font-family:var(--mono);font-size:12px;color:var(--text-faint);margin-bottom:16px;text-transform:uppercase;letter-spacing:.08em;}
+  .flow{
+    display:flex;align-items:center;gap:0;
+    overflow-x:auto;padding:20px 0;
+    scrollbar-width:none;
+  }
+  .flow::-webkit-scrollbar{display:none;}
+  .node{
+    flex:0 0 auto;
+    font-family:var(--mono);font-size:12px;font-weight:600;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:12px 16px;
+    color:var(--text-dim);
+    white-space:nowrap;
+    cursor:default;
+    position:relative;
+    transition:border-color .3s, color .3s, background .3s;
+  }
+  .node.active{border-color:var(--accent);color:var(--accent);background:var(--bg-elevated);}
+  .node .tip{
+    position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
+    background:var(--bg-elevated);border:1px solid var(--border);
+    padding:8px 12px;border-radius:6px;font-size:11px;color:var(--text-dim);
+    white-space:normal;width:180px;opacity:0;pointer-events:none;
+    transition:opacity .2s, transform .2s;
+    font-family:var(--sans);
+  }
+  .node:hover .tip{opacity:1;transform:translateX(-50%) translateY(-4px);}
+  .arrow{flex:0 0 auto;color:var(--text-faint);padding:0 10px;font-size:14px;}
+
+  /* ---------- SECTION GENERIC ---------- */
+  section{padding:100px 0;position:relative;}
+  .section-head{margin-bottom:48px;}
+  .section-tag{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .section-tag::before{content:'//';color:var(--text-faint);}
+  .section-title{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-0.02em;}
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:start;}
+  @media (max-width:760px){.about-grid{grid-template-columns:1fr;}}
+  .about-text p{color:var(--text-dim);margin-bottom:16px;font-size:15.5px;}
+  .about-text strong{color:var(--text);font-weight:600;}
+  .stack-card{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+    padding:24px;font-family:var(--mono);font-size:13px;
+  }
+  .stack-card .filename{color:var(--text-faint);font-size:11px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+  .stack-row{display:flex;justify-content:space-between;padding:6px 0;color:var(--text-dim);}
+  .stack-row .k{color:var(--cyan);}
+  .stack-row .v{color:var(--text);}
+
+  /* ---------- PROJECTS ---------- */
+  .projects{display:flex;flex-direction:column;gap:16px;}
+  .migration{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+    overflow:hidden;transition:transform .25s, border-color .25s, box-shadow .25s;
+    transform-style:preserve-3d;will-change:transform;
+  }
+  .migration:hover{border-color:var(--accent);box-shadow:0 12px 40px -12px rgba(0,0,0,.5);}
+  .migration-head{
+    padding:18px 22px;display:flex;justify-content:space-between;align-items:center;
+    cursor:pointer;gap:16px;flex-wrap:wrap;
+  }
+  .migration-file{font-family:var(--mono);font-size:13px;color:var(--text-faint);}
+  .migration-file .fn{color:var(--accent);}
+  .migration-name{font-size:17px;font-weight:700;margin-top:4px;}
+  .migration-badges{display:flex;gap:8px;flex-wrap:wrap;}
+  .badge{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text-dim);}
+  .migration-body{
+    max-height:0;overflow:hidden;transition:max-height .35s ease;
+    border-top:0 solid var(--border);
+  }
+  .migration.open .migration-body{max-height:260px;border-top:1px solid var(--border);}
+  .migration-body-inner{padding:20px 22px 24px;font-size:14.5px;color:var(--text-dim);}
+  .migration-body-inner .row{margin-bottom:10px;}
+  .migration-body-inner .label{font-family:var(--mono);font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+  .chevron{font-family:var(--mono);color:var(--text-faint);transition:transform .3s;}
+  .migration.open .chevron{transform:rotate(90deg);color:var(--accent);}
+
+  /* ---------- SKILLS ---------- */
+  .skills-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+  .skill-pill{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
+    padding:16px 18px;font-family:var(--mono);font-size:13px;
+    display:flex;flex-direction:column;gap:6px;
+    transition:transform .25s, border-color .25s;
+  }
+  .skill-pill:hover{transform:translateY(-4px);border-color:var(--cyan);}
+  .skill-pill .cat{color:var(--text-faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;}
+  .skill-pill .list{color:var(--text);}
+
+  /* ---------- CONTACT ---------- */
+  .contact-box{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
+    padding:56px 40px;text-align:center;position:relative;overflow:hidden;
+  }
+  .contact-box::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 0%, var(--accent-dim), transparent 60%);
+    pointer-events:none;
+  }
+  .contact-box h2{font-size:clamp(24px,4vw,34px);font-weight:800;margin-bottom:14px;position:relative;}
+  .contact-box p{color:var(--text-dim);margin-bottom:28px;position:relative;}
+  .contact-links{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;}
+
+  footer{padding:32px 0;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo"><span class="dot"></span>hasbun<span style="color:var(--text-faint)">.dev</span></div>
+    <ul class="navlinks">
+      <li><a href="#about">about</a></li>
+      <li><a href="#projects">projects</a></li>
+      <li><a href="#skills">skills</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow"><span id="typeline"></span><span class="terminal-cursor"></span></div>
+    <h1>Membangun sistem yang<br>dipakai orang, bukan<br>hanya <span>demo yang jalan.</span></h1>
+    <p class="hero-desc">
+      Backend developer dengan fokus <code>Laravel</code> &amp; <code>Filament</code>.
+      Merancang dan merawat aplikasi produksi untuk instansi pemerintah — dari
+      manajemen arsip, agenda kegiatan, hingga sistem skor turnamen real-time.
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary">Lihat Proyek →</a>
+      <a href="#contact" class="btn btn-ghost">Hubungi Saya</a>
+    </div>
+
+    <div class="lifecycle">
+      <div class="lifecycle-label">// alur kerja saya, secara harfiah</div>
+      <div class="flow" id="flow">
+        <div class="node" data-tip="Setiap request dimulai dari sini — dan saya selalu berpikir dari sudut pandang pengguna dulu.">Browser</div>
+        <div class="arrow">→</div>
+        <div class="node" data-tip="Route ditata rapi per modul, bukan satu file raksasa.">Route</div>
+        <div class="arrow">→</div>
+        <div class="node" data-tip="Auth, permission check (Spatie), rate limiting — semua lapis sebelum logic utama.">Middleware</div>
+        <div class="arrow">→</div>
+        <div class="node" data-tip="Tipis, cuma orkestrasi. Logic berat tidak numpuk di sini.">Controller</div>
+        <div class="arrow">→</div>
+        <div class="node" data-tip="Pattern Service+Action — logic bisnis hidup di sini, testable & reusable.">Service</div>
+        <div class="arrow">→</div>
+        <div class="node" data-tip="Observer menangani efek samping — cache invalidation, stock counter, audit log.">Model</div>
+        <div class="arrow">→</div>
+        <div class="node" data-tip="MySQL/MariaDB dengan indexing dan query yang saya audit untuk N+1.">Database</div>
+        <div class="arrow">→</div>
+        <div class="node" data-tip="Response yang konsisten — baik untuk Filament panel maupun JSON API.">Response</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="about">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag">tentang</div>
+      <div class="section-title">Dari balik meja ASN, tetap ngoding tiap hari</div>
+    </div>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>Saya bekerja sebagai <strong>ASN di Dinas Arsip dan Perpustakaan Kota Semarang</strong>, dengan tanggung jawab administratif di bidang umum dan kepegawaian. Di sela itu, saya berperan sebagai <strong>developer internal</strong> yang merancang, membangun, dan merawat aplikasi web untuk kebutuhan dinas dan unit pemerintah terkait.</p>
+        <p>Fokus saya ada di ekosistem <strong>Laravel &amp; Filament</strong> — mulai dari sistem manajemen inventaris habis pakai dengan stock ledger, portal informasi publik (PPID) dengan hardening keamanan berlapis, sampai sistem skor pertandingan silat real-time berbasis WebSocket.</p>
+        <p>Saya percaya kode yang baik itu <strong>membosankan dengan cara yang benar</strong> — pattern konsisten, cache yang di-invalidate dengan tepat, dan permission yang jelas — supaya sistem tetap bisa dirawat setelah saya tidak lagi jadi satu-satunya yang paham isinya.</p>
+      </div>
+      <div class="stack-card reveal">
+        <div class="filename">~/hasbun/profile.json</div>
+        <div class="stack-row"><span class="k">role</span><span class="v">Backend Developer</span></div>
+        <div class="stack-row"><span class="k">position</span><span class="v">Kasubbag Umum &amp; Kepegawaian</span></div>
+        <div class="stack-row"><span class="k">location</span><span class="v">Semarang, ID</span></div>
+        <div class="stack-row"><span class="k">stack</span><span class="v">Laravel · Filament</span></div>
+        <div class="stack-row"><span class="k">pattern</span><span class="v">Service + Action</span></div>
+        <div class="stack-row"><span class="k">status</span><span class="v" style="color:var(--green)">available</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag">migrations</div>
+      <div class="section-title">Proyek yang sudah dijalankan ke produksi</div>
+    </div>
+    <div class="projects" id="projects-list">
+
+      <div class="migration reveal">
+        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
+          <div>
+            <div class="migration-file">2026_01_00001_<span class="fn">create_simhap_system</span>.php</div>
+            <div class="migration-name">SIMHAP — Sistem Manajemen Habis Pakai</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="migration-badges">
+              <span class="badge">Laravel</span><span class="badge">Filament</span>
+            </div>
+            <span class="chevron">▸</span>
+          </div>
+        </div>
+        <div class="migration-body">
+          <div class="migration-body-inner">
+            <div class="row"><div class="label">Masalah</div>Pelacakan stok barang habis pakai dilakukan manual, rawan selisih dan sulit diaudit.</div>
+            <div class="row"><div class="label">Solusi</div>Ledger stok append-only dengan penghitung berbasis Observer dan <code style="color:var(--cyan)">lockForUpdate()</code> untuk mencegah race condition saat transaksi bersamaan.</div>
+            <div class="row"><div class="label">Detail teknis</div>10 tabel ternormalisasi, ULID untuk primary key transaksi, dibangun dalam roadmap 22 hari bertahap.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="migration reveal">
+        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
+          <div>
+            <div class="migration-file">2025_09_00014_<span class="fn">create_ppid_portal</span>.php</div>
+            <div class="migration-name">PPID Arpusda — Portal Informasi Publik</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="migration-badges">
+              <span class="badge">Filament v5</span><span class="badge">Security</span>
+            </div>
+            <span class="chevron">▸</span>
+          </div>
+        </div>
+        <div class="migration-body">
+          <div class="migration-body-inner">
+            <div class="row"><div class="label">Masalah</div>Permintaan informasi publik butuh alur yang transparan, aman dari penyalahgunaan, dan mudah diaudit.</div>
+            <div class="row"><div class="label">Solusi</div>Rate limiting, penomoran tiket anti-enumerasi (<code style="color:var(--cyan)">PPID-YYYY-XXXXXX</code>), CSP header, dan audit log berbasis IP di setiap pengajuan.</div>
+            <div class="row"><div class="label">Detail teknis</div>Dibangun dengan Filament v5, Spatie Media Library, dan bezhansalleh/filament-shield untuk kontrol akses granular.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="migration reveal">
+        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
+          <div>
+            <div class="migration-file">2025_06_00027_<span class="fn">create_agenda_arpus</span>.php</div>
+            <div class="migration-name">Agenda Arpus — Manajemen Kegiatan</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="migration-badges">
+              <span class="badge">Livewire v3</span><span class="badge">FullCalendar</span>
+            </div>
+            <span class="chevron">▸</span>
+          </div>
+        </div>
+        <div class="migration-body">
+          <div class="migration-body-inner">
+            <div class="row"><div class="label">Masalah</div>Jadwal kegiatan antar bagian tersebar di banyak dokumen, sulit dipantau real-time.</div>
+            <div class="row"><div class="label">Solusi</div>Integrasi FullCalendar v6 dengan polling real-time dan strategi cache versioning agar tetap ringan meski data terus bertambah.</div>
+            <div class="row"><div class="label">Detail teknis</div>Optimasi Filament Shield lewat <code style="color:var(--cyan)">Gate::before()</code> dan pembersihan konfigurasi Tailwind untuk performa PageSpeed.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="migration reveal">
+        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
+          <div>
+            <div class="migration-file">2025_03_00009_<span class="fn">create_esilat_skor</span>.php</div>
+            <div class="migration-name">E-Silat Skor — Real-time Tournament Scoring</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="migration-badges">
+              <span class="badge">Laravel Reverb</span><span class="badge">WebSocket</span>
+            </div>
+            <span class="chevron">▸</span>
+          </div>
+        </div>
+        <div class="migration-body">
+          <div class="migration-body-inner">
+            <div class="row"><div class="label">Masalah</div>Penilaian pertandingan pencak silat manual rawan telat dan tidak sinkron antar juri.</div>
+            <div class="row"><div class="label">Solusi</div>Sistem skor real-time berbasis WebSocket sehingga setiap input juri langsung tersinkronisasi ke papan skor.</div>
+            <div class="row"><div class="label">Detail teknis</div>Dibangun dengan Laravel Reverb sebagai WebSocket server, tanpa dependensi layanan pihak ketiga.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="migration reveal">
+        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
+          <div>
+            <div class="migration-file">2026_05_00002_<span class="fn">create_magang_management</span>.php</div>
+            <div class="migration-name">Manajemen Peserta Magang</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="migration-badges">
+              <span class="badge">Inertia + React</span><span class="badge">shadcn/ui</span>
+            </div>
+            <span class="chevron">▸</span>
+          </div>
+        </div>
+        <div class="migration-body">
+          <div class="migration-body-inner">
+            <div class="row"><div class="label">Masalah</div>Pendataan peserta magang dan penilaian masih tersebar di spreadsheet terpisah.</div>
+            <div class="row"><div class="label">Solusi</div>Aplikasi terpusat dengan arsitektur Request-Service-Controller penuh, policy berbasis peran, dan seeder untuk data awal.</div>
+            <div class="row"><div class="label">Detail teknis</div>Laravel 12 dengan stack Inertia.js + React + shadcn/ui — proyek eksplorasi pertama saya di luar Blade/Livewire.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag">composer.json</div>
+      <div class="section-title">Tools yang dipakai sehari-hari</div>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-pill reveal"><span class="cat">Backend</span><span class="list">Laravel 12, PHP 8.3+</span></div>
+      <div class="skill-pill reveal"><span class="cat">Admin Panel</span><span class="list">Filament v4 / v5</span></div>
+      <div class="skill-pill reveal"><span class="cat">Reactivity</span><span class="list">Livewire v3, Alpine.js</span></div>
+      <div class="skill-pill reveal"><span class="cat">SPA Stack</span><span class="list">Inertia.js, React, shadcn/ui</span></div>
+      <div class="skill-pill reveal"><span class="cat">Realtime</span><span class="list">Laravel Reverb, WebSocket</span></div>
+      <div class="skill-pill reveal"><span class="cat">Database</span><span class="list">MySQL, MariaDB, Redis</span></div>
+      <div class="skill-pill reveal"><span class="cat">Packages</span><span class="list">Spatie Permission, Activitylog</span></div>
+      <div class="skill-pill reveal"><span class="cat">Pattern</span><span class="list">Service+Action, Observer</span></div>
+      <div class="skill-pill reveal"><span class="cat">Deployment</span><span class="list">cPanel/LiteSpeed, Vite</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="contact-box reveal">
+      <h2>Ada sistem yang perlu dibangun?</h2>
+      <p>Terbuka untuk diskusi seputar Laravel, Filament, atau kolaborasi proyek pemerintahan digital.</p>
+      <div class="contact-links">
+        <a href="mailto:hello@hasbun.dev" class="btn btn-primary">✉ Kirim Email</a>
+        <a href="#" class="btn btn-ghost">GitHub</a>
+        <a href="#" class="btn btn-ghost">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">© 2026 Hasbun — built with Laravel-brain, shipped as static HTML.</div>
+</footer>
+
+<script>
+  // typing effect
+  const lines = [
+    'whoami',
+    'php artisan serve --project=hasbun-portfolio',
+    'echo "membangun sistem, bukan sekadar demo"'
+  ];
+  const el = document.getElementById('typeline');
+  let li = 0, ci = 0, deleting = false;
+  function type(){
+    const current = lines[li];
+    if(!deleting){
+      el.textContent = current.slice(0, ci+1);
+      ci++;
+      if(ci === current.length){ deleting = true; setTimeout(type, 1400); return; }
+    } else {
+      el.textContent = current.slice(0, ci-1);
+      ci--;
+      if(ci === 0){ deleting = false; li = (li+1) % lines.length; }
+    }
+    setTimeout(type, deleting ? 30 : 55);
+  }
+  type();
+
+  // scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  }, {threshold:.15});
+  revealEls.forEach(el=>io.observe(el));
+
+  // lifecycle node pulse-through on load + tooltips
+  const flowNodes = document.querySelectorAll('.node');
+  flowNodes.forEach(n=>{
+    const tip = document.createElement('div');
+    tip.className = 'tip';
+    tip.textContent = n.dataset.tip;
+    n.appendChild(tip);
+  });
+  let idx = 0;
+  function pulse(){
+    flowNodes.forEach(n=>n.classList.remove('active'));
+    flowNodes[idx].classList.add('active');
+    idx = (idx+1) % flowNodes.length;
+  }
+  setInterval(pulse, 900);
+  pulse();
+
+  // tilt effect on project migration cards
+  document.querySelectorAll('.migration').forEach(card=>{
+    card.addEventListener('mousemove', (e)=>{
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left)/r.width - .5;
+      const y = (e.clientY - r.top)/r.height - .5;
+      card.style.transform = `perspective(800px) rotateY(${x*3}deg) rotateX(${-y*3}deg) translateY(-2px)`;
+    });
+    card.addEventListener('mouseleave', ()=>{ card.style.transform = ''; });
+  });
+</script>
+
+</body>
+</html>
