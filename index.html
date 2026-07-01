@@ -1,526 +1,913 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hasbun — Backend Developer</title>
+<title>Backend Developer · Laravel & Filament | Portofolio</title>
+<meta name="description" content="Portofolio backend developer — Laravel 12, Filament, Livewire, dan sistem untuk layanan publik.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* ===================== DESIGN TOKENS ===================== */
   :root{
-    --bg: #0D1117;
-    --bg-elevated: #131A24;
-    --bg-card: #161D28;
-    --border: #232B38;
-    --text: #E6EDF3;
-    --text-dim: #8B949E;
-    --text-faint: #5A6472;
-    --accent: #FF6B4A;
-    --accent-dim: #FF6B4A33;
-    --cyan: #56D4DD;
-    --green: #4FD68C;
-    --mono: 'JetBrains Mono', monospace;
-    --sans: 'Inter', sans-serif;
+    --font-display: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* spacing (8pt grid) */
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-6: 24px;
+    --sp-8: 32px; --sp-10: 40px; --sp-12: 48px; --sp-16: 64px; --sp-20: 80px; --sp-24: 96px;
+
+    --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px; --radius-2xl: 20px;
+
+    --dur-1: 150ms; --dur-2: 250ms; --dur-3: 300ms;
+    --ease: cubic-bezier(.22,.61,.36,1);
+
+    --container: 1200px;
+
+    /* brand accents (functional: also used as code-syntax colors, not decorative) */
+    --coral: #ff6a48;
+    --coral-dim: #e0492e;
+    --mint: #59d9a3;
+    --violet: #c792ea;
+    --amber: #ffcb6b;
+    --sky: #82aaff;
   }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+
+  [data-theme="dark"]{
+    --bg: #0b0e13;
+    --bg-elevated: #12161f;
+    --bg-elevated-2: #171c27;
+    --border: #232838;
+    --border-strong: #313850;
+    --ink: #e8eaf0;
+    --mist: #929cb3;
+    --mist-dim: #6b7690;
+    --shadow-color: 0 0% 0%;
+  }
+
+  [data-theme="light"]{
+    --bg: #f4f6f9;
+    --bg-elevated: #ffffff;
+    --bg-elevated-2: #eceff4;
+    --border: #dde1ea;
+    --border-strong: #c4cad9;
+    --ink: #12151c;
+    --mist: #4b5468;
+    --mist-dim: #6e7791;
+    --shadow-color: 220 20% 40%;
+    --coral: #e0492e;
+    --coral-dim: #c33a22;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+
   body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--sans);
-    line-height:1.6;
-    overflow-x:hidden;
-  }
-  ::selection{background:var(--accent-dim);color:var(--accent);}
-
-  /* background grid texture */
-  body::before{
-    content:'';
-    position:fixed;inset:0;
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    transition: background var(--dur-3) var(--ease), color var(--dur-3) var(--ease);
     background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size:64px 64px;
-    opacity:.25;
-    pointer-events:none;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 75%);
-    z-index:0;
+      radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
+    background-size: 28px 28px;
   }
 
-  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+  h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  p{ margin: 0; }
+  a{ color: inherit; text-decoration: none; }
+  ul{ margin: 0; padding: 0; list-style: none; }
+  button{ font-family: inherit; cursor: pointer; }
+  code, .mono{ font-family: var(--font-mono); }
 
-  /* ---------- NAV ---------- */
-  nav{
-    position:fixed;top:0;left:0;right:0;z-index:100;
-    background:rgba(13,17,23,.85);
-    backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--border);
-  }
-  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;}
-  .logo{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--text);display:flex;align-items:center;gap:8px;}
-  .logo .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s ease-in-out infinite;}
-  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
-  .navlinks{display:flex;gap:32px;list-style:none;font-family:var(--mono);font-size:13px;}
-  .navlinks a{color:var(--text-dim);text-decoration:none;transition:color .2s;position:relative;}
-  .navlinks a:hover{color:var(--accent);}
-  .navlinks a::before{content:'./';color:var(--text-faint);}
-  @media (max-width:640px){.navlinks{display:none;}}
+  img,svg{ display:block; }
 
-  /* ---------- HERO ---------- */
-  header{
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    padding-top:64px;
-    position:relative;
+  /* focus visibility (accessibility) */
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+    outline: 2px solid var(--coral);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
   }
+
+  .skip-link{
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--coral);
+    color: #0b0e13;
+    padding: var(--sp-3) var(--sp-4);
+    z-index: 1000;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    border-radius: 0 0 var(--radius-md) 0;
+  }
+  .skip-link:focus{ left: 0; }
+
+  .wrap{
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 var(--sp-6);
+  }
+
+  section{ padding: var(--sp-24) 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type{ border-bottom: none; }
+
   .eyebrow{
-    font-family:var(--mono);font-size:13px;color:var(--cyan);
-    display:flex;align-items:center;gap:10px;margin-bottom:24px;
-    opacity:0;animation:fadeUp .6s ease forwards .1s;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--coral);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-4);
+    letter-spacing: 0.02em;
   }
-  .eyebrow::before{content:'$';color:var(--text-faint);}
-  .terminal-cursor{display:inline-block;width:8px;height:16px;background:var(--cyan);animation:blink 1s step-end infinite;}
-  h1{
-    font-size:clamp(36px,6vw,64px);
-    font-weight:800;letter-spacing:-0.02em;line-height:1.08;
-    margin-bottom:20px;
-    opacity:0;animation:fadeUp .6s ease forwards .25s;
+  .eyebrow::before{ content: "//"; color: var(--mist-dim); }
+
+  /* ===================== NAV ===================== */
+  header.site-nav{
+    position: sticky; top: 0; z-index: 100;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
   }
-  h1 span{color:var(--accent);}
-  .hero-desc{
-    font-size:18px;color:var(--text-dim);max-width:560px;margin-bottom:36px;
-    opacity:0;animation:fadeUp .6s ease forwards .4s;
+  .nav-inner{
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: var(--sp-4) var(--sp-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .hero-desc code{font-family:var(--mono);color:var(--cyan);background:var(--bg-elevated);padding:1px 6px;border-radius:4px;font-size:15px;}
-  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;opacity:0;animation:fadeUp .6s ease forwards .55s;}
+  .logo{
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 18px;
+    display: flex; align-items: center; gap: var(--sp-1);
+  }
+  .logo .tag{ color: var(--coral); }
+  .nav-links{
+    display: flex; align-items: center; gap: var(--sp-8);
+  }
+  .nav-links a{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--mist);
+    transition: color var(--dur-2) var(--ease);
+    padding: var(--sp-2) 0;
+    position: relative;
+  }
+  .nav-links a::after{
+    content: "";
+    position: absolute; left: 0; bottom: -2px;
+    width: 0; height: 1px; background: var(--coral);
+    transition: width var(--dur-2) var(--ease);
+  }
+  .nav-links a:hover{ color: var(--ink); }
+  .nav-links a:hover::after{ width: 100%; }
+  .nav-actions{ display: flex; align-items: center; gap: var(--sp-4); }
+
+  .theme-toggle{
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--dur-2) var(--ease), transform var(--dur-1) var(--ease);
+  }
+  .theme-toggle:hover{ border-color: var(--coral); }
+  .theme-toggle:active{ transform: scale(.92); }
+  .theme-toggle svg{ width: 18px; height: 18px; stroke: var(--ink); }
+  .theme-toggle .moon{ display: none; }
+  [data-theme="light"] .theme-toggle .sun{ display: none; }
+  [data-theme="light"] .theme-toggle .moon{ display: block; }
+
+  .nav-toggle-mobile{
+    display: none;
+    width: 40px; height: 40px;
+    align-items: center; justify-content: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+  .nav-toggle-mobile svg{ width: 20px; height: 20px; stroke: var(--ink); }
+
+  @media (max-width: 860px){
+    .nav-links{
+      position: fixed; inset: 65px 0 auto 0;
+      flex-direction: column; align-items: flex-start;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: var(--sp-6);
+      gap: var(--sp-6);
+      transform: translateY(-120%);
+      opacity: 0;
+      transition: transform var(--dur-3) var(--ease), opacity var(--dur-3) var(--ease);
+      pointer-events: none;
+    }
+    .nav-links.open{ transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .nav-toggle-mobile{ display: flex; }
+  }
+
+  /* ===================== BUTTONS ===================== */
   .btn{
-    font-family:var(--mono);font-size:14px;font-weight:500;
-    padding:12px 22px;border-radius:8px;text-decoration:none;
-    display:inline-flex;align-items:center;gap:8px;
-    transition:transform .2s, box-shadow .2s, background .2s;
-    border:1px solid transparent;
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-6);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 44px;
+    border: 1px solid transparent;
+    transition: transform var(--dur-2) var(--ease), background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
   }
-  .btn-primary{background:var(--accent);color:#1a0e0a;}
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--accent-dim);}
-  .btn-ghost{border-color:var(--border);color:var(--text);}
-  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
+  .btn-primary{
+    background: var(--coral); color: #0b0e13;
+  }
+  .btn-primary:hover{ background: var(--coral-dim); transform: translateY(-2px); }
+  .btn-ghost{
+    background: transparent; border-color: var(--border-strong); color: var(--ink);
+  }
+  .btn-ghost:hover{ border-color: var(--coral); color: var(--coral); transform: translateY(-2px); }
 
-  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  /* ===================== HERO ===================== */
+  .hero{
+    padding-top: var(--sp-24);
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--sp-16);
+    align-items: center;
+  }
+  .hero h1{
+    font-size: clamp(34px, 4.4vw, 52px);
+    line-height: 1.12;
+    margin-bottom: var(--sp-6);
+  }
+  .hero h1 .accent{ color: var(--coral); }
+  .hero p.lead{
+    color: var(--mist);
+    font-size: 18px;
+    max-width: 52ch;
+    margin-bottom: var(--sp-8);
+  }
+  .hero .cta-row{ display: flex; gap: var(--sp-4); flex-wrap: wrap; margin-bottom: var(--sp-10); }
+  .role-pills{ display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+  .role-pill{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: var(--sp-1) var(--sp-3);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--mist);
+  }
 
-  /* ---------- LIFECYCLE DIAGRAM ---------- */
-  .lifecycle{
-    margin-top:64px;
-    opacity:0;animation:fadeUp .8s ease forwards .7s;
+  /* terminal window */
+  .terminal{
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 24px 60px -20px hsl(var(--shadow-color) / .5);
   }
-  .lifecycle-label{font-family:var(--mono);font-size:12px;color:var(--text-faint);margin-bottom:16px;text-transform:uppercase;letter-spacing:.08em;}
-  .flow{
-    display:flex;align-items:center;gap:0;
-    overflow-x:auto;padding:20px 0;
-    scrollbar-width:none;
+  .terminal-bar{
+    display: flex; align-items: center; gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--bg-elevated-2);
+    border-bottom: 1px solid var(--border);
   }
-  .flow::-webkit-scrollbar{display:none;}
-  .node{
-    flex:0 0 auto;
-    font-family:var(--mono);font-size:12px;font-weight:600;
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:8px;
-    padding:12px 16px;
-    color:var(--text-dim);
-    white-space:nowrap;
-    cursor:default;
-    position:relative;
-    transition:border-color .3s, color .3s, background .3s;
+  .terminal-dot{ width: 11px; height: 11px; border-radius: 50%; }
+  .terminal-dot.red{ background: #ff5f57; }
+  .terminal-dot.yellow{ background: #febc2e; }
+  .terminal-dot.green{ background: #28c840; }
+  .terminal-title{
+    font-family: var(--font-mono); font-size: 12px; color: var(--mist);
+    margin-left: var(--sp-2);
   }
-  .node.active{border-color:var(--accent);color:var(--accent);background:var(--bg-elevated);}
-  .node .tip{
-    position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
-    background:var(--bg-elevated);border:1px solid var(--border);
-    padding:8px 12px;border-radius:6px;font-size:11px;color:var(--text-dim);
-    white-space:normal;width:180px;opacity:0;pointer-events:none;
-    transition:opacity .2s, transform .2s;
-    font-family:var(--sans);
+  .terminal-body{
+    padding: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.75;
+    min-height: 280px;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
-  .node:hover .tip{opacity:1;transform:translateX(-50%) translateY(-4px);}
-  .arrow{flex:0 0 auto;color:var(--text-faint);padding:0 10px;font-size:14px;}
+  .tk-kw{ color: var(--violet); }
+  .tk-str{ color: var(--mint); }
+  .tk-fn{ color: var(--sky); }
+  .tk-cls{ color: var(--amber); }
+  .tk-cmt{ color: var(--mist-dim); }
+  .tk-var{ color: var(--ink); }
+  .caret{
+    display: inline-block; width: 8px; height: 16px;
+    background: var(--coral); vertical-align: text-bottom;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity: 0; } }
 
-  /* ---------- SECTION GENERIC ---------- */
-  section{padding:100px 0;position:relative;}
-  .section-head{margin-bottom:48px;}
-  .section-tag{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
-  .section-tag::before{content:'//';color:var(--text-faint);}
-  .section-title{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-0.02em;}
-  .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease, transform .6s ease;}
-  .reveal.in{opacity:1;transform:translateY(0);}
+  @media (max-width: 960px){
+    .hero{ grid-template-columns: 1fr; padding-top: var(--sp-16); gap: var(--sp-10); }
+  }
 
-  /* ---------- ABOUT ---------- */
-  .about-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:start;}
-  @media (max-width:760px){.about-grid{grid-template-columns:1fr;}}
-  .about-text p{color:var(--text-dim);margin-bottom:16px;font-size:15.5px;}
-  .about-text strong{color:var(--text);font-weight:600;}
-  .stack-card{
-    background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
-    padding:24px;font-family:var(--mono);font-size:13px;
+  /* ===================== SCROLL REVEAL ===================== */
+  .reveal{
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .7s var(--ease), transform .7s var(--ease);
   }
-  .stack-card .filename{color:var(--text-faint);font-size:11px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-  .stack-row{display:flex;justify-content:space-between;padding:6px 0;color:var(--text-dim);}
-  .stack-row .k{color:var(--cyan);}
-  .stack-row .v{color:var(--text);}
+  .reveal.in-view{ opacity: 1; transform: none; }
 
-  /* ---------- PROJECTS ---------- */
-  .projects{display:flex;flex-direction:column;gap:16px;}
-  .migration{
-    background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
-    overflow:hidden;transition:transform .25s, border-color .25s, box-shadow .25s;
-    transform-style:preserve-3d;will-change:transform;
+  /* ===================== ABOUT ===================== */
+  .about-grid{
+    display: grid;
+    grid-template-columns: 1fr 0.85fr;
+    gap: var(--sp-16);
+    align-items: start;
   }
-  .migration:hover{border-color:var(--accent);box-shadow:0 12px 40px -12px rgba(0,0,0,.5);}
-  .migration-head{
-    padding:18px 22px;display:flex;justify-content:space-between;align-items:center;
-    cursor:pointer;gap:16px;flex-wrap:wrap;
+  .about-text p{ color: var(--mist); margin-bottom: var(--sp-4); font-size: 16px; }
+  .about-text p:last-child{ margin-bottom: 0; }
+  .principles{
+    margin-top: var(--sp-8);
+    display: grid;
+    gap: var(--sp-3);
   }
-  .migration-file{font-family:var(--mono);font-size:13px;color:var(--text-faint);}
-  .migration-file .fn{color:var(--accent);}
-  .migration-name{font-size:17px;font-weight:700;margin-top:4px;}
-  .migration-badges{display:flex;gap:8px;flex-wrap:wrap;}
-  .badge{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text-dim);}
-  .migration-body{
-    max-height:0;overflow:hidden;transition:max-height .35s ease;
-    border-top:0 solid var(--border);
+  .principle{
+    display: flex; gap: var(--sp-3); align-items: flex-start;
+    font-size: 14px; color: var(--mist);
   }
-  .migration.open .migration-body{max-height:260px;border-top:1px solid var(--border);}
-  .migration-body-inner{padding:20px 22px 24px;font-size:14.5px;color:var(--text-dim);}
-  .migration-body-inner .row{margin-bottom:10px;}
-  .migration-body-inner .label{font-family:var(--mono);font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
-  .chevron{font-family:var(--mono);color:var(--text-faint);transition:transform .3s;}
-  .migration.open .chevron{transform:rotate(90deg);color:var(--accent);}
+  .principle .dot{
+    margin-top: 7px; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--coral); flex: none;
+  }
+  .principle b{ color: var(--ink); font-weight: 500; }
 
-  /* ---------- SKILLS ---------- */
-  .skills-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
-  .skill-pill{
-    background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
-    padding:16px 18px;font-family:var(--mono);font-size:13px;
-    display:flex;flex-direction:column;gap:6px;
-    transition:transform .25s, border-color .25s;
+  .neofetch{
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-6);
+    font-family: var(--font-mono);
+    font-size: 13px;
   }
-  .skill-pill:hover{transform:translateY(-4px);border-color:var(--cyan);}
-  .skill-pill .cat{color:var(--text-faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;}
-  .skill-pill .list{color:var(--text);}
+  .neofetch-row{
+    display: flex; gap: var(--sp-3); padding: var(--sp-1) 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .neofetch-row:last-child{ border-bottom: none; }
+  .neofetch-row .k{ color: var(--coral); min-width: 92px; flex: none; }
+  .neofetch-row .v{ color: var(--mist); }
+  .neofetch-header{
+    display: flex; align-items: center; gap: var(--sp-2);
+    margin-bottom: var(--sp-4); padding-bottom: var(--sp-4);
+    border-bottom: 1px solid var(--border);
+  }
+  .neofetch-header .avatar{
+    width: 40px; height: 40px; border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--coral), var(--violet));
+    flex: none;
+  }
+  .neofetch-header .name{ font-weight: 600; color: var(--ink); font-family: var(--font-display); }
+  .neofetch-header .sub{ color: var(--mist-dim); font-size: 12px; }
 
-  /* ---------- CONTACT ---------- */
-  .contact-box{
-    background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
-    padding:56px 40px;text-align:center;position:relative;overflow:hidden;
+  @media (max-width: 860px){
+    .about-grid{ grid-template-columns: 1fr; }
   }
-  .contact-box::before{
-    content:'';position:absolute;inset:0;
-    background:radial-gradient(circle at 50% 0%, var(--accent-dim), transparent 60%);
-    pointer-events:none;
-  }
-  .contact-box h2{font-size:clamp(24px,4vw,34px);font-weight:800;margin-bottom:14px;position:relative;}
-  .contact-box p{color:var(--text-dim);margin-bottom:28px;position:relative;}
-  .contact-links{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;}
 
-  footer{padding:32px 0;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);}
+  /* ===================== SECTION HEADERS ===================== */
+  .section-head{ margin-bottom: var(--sp-12); max-width: 640px; }
+  .section-head h2{ font-size: clamp(26px, 3vw, 34px); margin-bottom: var(--sp-3); }
+  .section-head p{ color: var(--mist); font-size: 16px; }
+
+  /* ===================== PROJECTS ===================== */
+  .project-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--sp-6);
+  }
+  .project-card{
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-6);
+    transition: transform .12s linear, border-color var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
+    transform-style: preserve-3d;
+    will-change: transform;
+    display: flex; flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .project-card:hover{
+    border-color: var(--border-strong);
+    box-shadow: 0 30px 60px -30px hsl(var(--shadow-color) / .6);
+  }
+  .project-index{
+    font-family: var(--font-mono); font-size: 12px; color: var(--mist-dim);
+  }
+  .project-card h3{ font-size: 19px; }
+  .project-card p{ color: var(--mist); font-size: 14.5px; }
+  .project-tags{ display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: auto; }
+  .tag{
+    font-family: var(--font-mono); font-size: 11px;
+    padding: var(--sp-1) var(--sp-2);
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--mist);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .4s var(--ease), transform .4s var(--ease);
+  }
+  .tag.show{ opacity: 1; transform: none; }
+
+  /* ===================== SKILLS ===================== */
+  .skills-groups{ display: grid; gap: var(--sp-10); }
+  .skill-group h3{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--coral);
+    margin-bottom: var(--sp-4);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .badge-row{ display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+  .badge{
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-4);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13.5px;
+    color: var(--ink);
+    opacity: 0;
+    transform: translateY(10px) scale(.96);
+    transition: opacity .45s var(--ease), transform .45s var(--ease), border-color var(--dur-2) var(--ease);
+  }
+  .badge.show{ opacity: 1; transform: none; }
+  .badge:hover{ border-color: var(--coral); }
+  .badge .swatch{ width: 8px; height: 8px; border-radius: 50%; flex: none; }
+
+  /* ===================== CONTACT ===================== */
+  .contact-panel{
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: var(--sp-16);
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--sp-12);
+    align-items: center;
+  }
+  .contact-panel h2{ font-size: clamp(26px, 3vw, 32px); margin-bottom: var(--sp-4); }
+  .contact-panel p{ color: var(--mist); max-width: 46ch; margin-bottom: var(--sp-8); }
+  .contact-links{ display: flex; flex-direction: column; gap: var(--sp-3); }
+  .contact-link{
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: var(--sp-4);
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--dur-2) var(--ease), transform var(--dur-2) var(--ease);
+    font-size: 14.5px;
+  }
+  .contact-link:hover{ border-color: var(--coral); transform: translateX(4px); }
+  .contact-link svg{ width: 18px; height: 18px; stroke: var(--coral); flex: none; }
+  .contact-link .label{ color: var(--mist-dim); font-size: 12px; display: block; font-family: var(--font-mono); }
+  .contact-link .value{ color: var(--ink); font-family: var(--font-mono); }
+  .contact-prompt{
+    font-family: var(--font-mono); font-size: 13px; color: var(--mist-dim);
+    margin-top: var(--sp-6);
+  }
+  .contact-prompt .prompt-accent{ color: var(--mint); }
+
+  @media (max-width: 860px){
+    .contact-panel{ grid-template-columns: 1fr; padding: var(--sp-8); }
+  }
+
+  footer{
+    padding: var(--sp-10) 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--mist-dim);
+  }
+  footer .heart{ color: var(--coral); }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="wrap">
-    <div class="logo"><span class="dot"></span>hasbun<span style="color:var(--text-faint)">.dev</span></div>
-    <ul class="navlinks">
-      <li><a href="#about">about</a></li>
-      <li><a href="#projects">projects</a></li>
-      <li><a href="#skills">skills</a></li>
-      <li><a href="#contact">contact</a></li>
-    </ul>
-  </div>
-</nav>
+<a href="#main" class="skip-link">Lewati ke konten utama</a>
 
-<header>
-  <div class="wrap">
-    <div class="eyebrow"><span id="typeline"></span><span class="terminal-cursor"></span></div>
-    <h1>Membangun sistem yang<br>dipakai orang, bukan<br>hanya <span>demo yang jalan.</span></h1>
-    <p class="hero-desc">
-      Backend developer dengan fokus <code>Laravel</code> &amp; <code>Filament</code>.
-      Merancang dan merawat aplikasi produksi untuk instansi pemerintah — dari
-      manajemen arsip, agenda kegiatan, hingga sistem skor turnamen real-time.
-    </p>
-    <div class="hero-cta">
-      <a href="#projects" class="btn btn-primary">Lihat Proyek →</a>
-      <a href="#contact" class="btn btn-ghost">Hubungi Saya</a>
-    </div>
-
-    <div class="lifecycle">
-      <div class="lifecycle-label">// alur kerja saya, secara harfiah</div>
-      <div class="flow" id="flow">
-        <div class="node" data-tip="Setiap request dimulai dari sini — dan saya selalu berpikir dari sudut pandang pengguna dulu.">Browser</div>
-        <div class="arrow">→</div>
-        <div class="node" data-tip="Route ditata rapi per modul, bukan satu file raksasa.">Route</div>
-        <div class="arrow">→</div>
-        <div class="node" data-tip="Auth, permission check (Spatie), rate limiting — semua lapis sebelum logic utama.">Middleware</div>
-        <div class="arrow">→</div>
-        <div class="node" data-tip="Tipis, cuma orkestrasi. Logic berat tidak numpuk di sini.">Controller</div>
-        <div class="arrow">→</div>
-        <div class="node" data-tip="Pattern Service+Action — logic bisnis hidup di sini, testable & reusable.">Service</div>
-        <div class="arrow">→</div>
-        <div class="node" data-tip="Observer menangani efek samping — cache invalidation, stock counter, audit log.">Model</div>
-        <div class="arrow">→</div>
-        <div class="node" data-tip="MySQL/MariaDB dengan indexing dan query yang saya audit untuk N+1.">Database</div>
-        <div class="arrow">→</div>
-        <div class="node" data-tip="Response yang konsisten — baik untuk Filament panel maupun JSON API.">Response</div>
-      </div>
+<header class="site-nav">
+  <div class="nav-inner">
+    <a href="#" class="logo" aria-label="Beranda"><span class="tag">&lt;</span>Dev<span class="tag">/&gt;</span></a>
+    <nav id="nav-links" class="nav-links" aria-label="Navigasi utama">
+      <a href="#about">tentang</a>
+      <a href="#projects">proyek</a>
+      <a href="#skills">skill</a>
+      <a href="#contact">kontak</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Ubah tema terang/gelap" aria-pressed="false">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button class="nav-toggle-mobile" id="mobileToggle" aria-label="Buka menu" aria-expanded="false" aria-controls="nav-links">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
     </div>
   </div>
 </header>
 
-<section id="about">
-  <div class="wrap">
+<main id="main">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero wrap" style="border-bottom:1px solid var(--border);">
+    <div>
+      <span class="eyebrow">backend developer · ASN</span>
+      <h1>Membangun sistem yang benar&#8209;benar <span class="accent">dipakai</span>, bukan sekadar demo di localhost.</h1>
+      <p class="lead">Saya backend developer yang berfokus pada Laravel 12, Filament, dan Livewire — sehari&#8209;hari merancang aplikasi internal untuk layanan publik, dari manajemen barang habis pakai sampai sistem skor turnamen real&#8209;time.</p>
+      <div class="cta-row">
+        <a href="#projects" class="btn btn-primary">Lihat Proyek</a>
+        <a href="#contact" class="btn btn-ghost">Hubungi Saya</a>
+      </div>
+      <div class="role-pills">
+        <span class="role-pill">Laravel 12</span>
+        <span class="role-pill">Filament v4 / v5</span>
+        <span class="role-pill">Livewire v3</span>
+        <span class="role-pill">Service + Action Pattern</span>
+      </div>
+    </div>
+
+    <div class="terminal" role="img" aria-label="Cuplikan kode PHP yang menggambarkan profil developer">
+      <div class="terminal-bar">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">Developer.php</span>
+      </div>
+      <div class="terminal-body" id="typewriter" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ABOUT ===================== -->
+  <section id="about" class="wrap">
     <div class="section-head reveal">
-      <div class="section-tag">tentang</div>
-      <div class="section-title">Dari balik meja ASN, tetap ngoding tiap hari</div>
+      <span class="eyebrow">tentang saya</span>
+      <h2>Dari meja ASN ke <code class="mono" style="font-size:0.85em;">php artisan serve</code></h2>
     </div>
     <div class="about-grid">
       <div class="about-text reveal">
-        <p>Saya bekerja sebagai <strong>ASN di Dinas Arsip dan Perpustakaan Kota Semarang</strong>, dengan tanggung jawab administratif di bidang umum dan kepegawaian. Di sela itu, saya berperan sebagai <strong>developer internal</strong> yang merancang, membangun, dan merawat aplikasi web untuk kebutuhan dinas dan unit pemerintah terkait.</p>
-        <p>Fokus saya ada di ekosistem <strong>Laravel &amp; Filament</strong> — mulai dari sistem manajemen inventaris habis pakai dengan stock ledger, portal informasi publik (PPID) dengan hardening keamanan berlapis, sampai sistem skor pertandingan silat real-time berbasis WebSocket.</p>
-        <p>Saya percaya kode yang baik itu <strong>membosankan dengan cara yang benar</strong> — pattern konsisten, cache yang di-invalidate dengan tepat, dan permission yang jelas — supaya sistem tetap bisa dirawat setelah saya tidak lagi jadi satu-satunya yang paham isinya.</p>
+        <p>Saya bekerja sebagai ASN yang merangkap peran sebagai backend developer, membangun aplikasi untuk mendukung layanan di lingkungan pemerintah kota — mulai dari sistem administrasi internal sampai layanan yang diakses publik.</p>
+        <p>Keseharian saya berkutat dengan Laravel 12 dan Filament v4/v5 untuk membangun panel admin, Livewire v3 untuk interaksi tanpa reload halaman, serta mulai bereksplorasi dengan Inertia.js + React + shadcn/ui untuk kebutuhan antarmuka yang lebih custom.</p>
+        <p>Saya percaya kode yang baik adalah kode yang mudah diaudit dan diubah tiga bulan kemudian — bukan hanya yang berjalan hari ini.</p>
+        <div class="principles">
+          <div class="principle"><span class="dot"></span><span><b>Service + Action Pattern</b> — memisahkan logic bisnis dari controller supaya mudah diuji dan digunakan ulang.</span></div>
+          <div class="principle"><span class="dot"></span><span><b>Observer Pattern</b> — reaksi otomatis terhadap perubahan data, seperti update stok saat transaksi terjadi.</span></div>
+          <div class="principle"><span class="dot"></span><span><b>Spatie Permission & Activitylog</b> — akses berbasis peran dan jejak audit yang bisa dipertanggungjawabkan.</span></div>
+        </div>
       </div>
-      <div class="stack-card reveal">
-        <div class="filename">~/hasbun/profile.json</div>
-        <div class="stack-row"><span class="k">role</span><span class="v">Backend Developer</span></div>
-        <div class="stack-row"><span class="k">position</span><span class="v">Kasubbag Umum &amp; Kepegawaian</span></div>
-        <div class="stack-row"><span class="k">location</span><span class="v">Semarang, ID</span></div>
-        <div class="stack-row"><span class="k">stack</span><span class="v">Laravel · Filament</span></div>
-        <div class="stack-row"><span class="k">pattern</span><span class="v">Service + Action</span></div>
-        <div class="stack-row"><span class="k">status</span><span class="v" style="color:var(--green)">available</span></div>
+
+      <div class="neofetch reveal">
+        <div class="neofetch-header">
+          <div class="avatar" aria-hidden="true"></div>
+          <div>
+            <div class="name">guest@portfolio</div>
+            <div class="sub">Backend Developer / ASN</div>
+          </div>
+        </div>
+        <div class="neofetch-row"><span class="k">Peran</span><span class="v">Backend Developer & ASN</span></div>
+        <div class="neofetch-row"><span class="k">Stack</span><span class="v">Laravel, Filament, Livewire</span></div>
+        <div class="neofetch-row"><span class="k">Eksplorasi</span><span class="v">Inertia + React + shadcn/ui</span></div>
+        <div class="neofetch-row"><span class="k">Domain</span><span class="v">Sistem layanan pemerintah</span></div>
+        <div class="neofetch-row"><span class="k">Database</span><span class="v">MySQL, Redis</span></div>
+        <div class="neofetch-row"><span class="k">Realtime</span><span class="v">Laravel Reverb (WebSocket)</span></div>
+        <div class="neofetch-row"><span class="k">Pattern</span><span class="v">Service+Action, Observer</span></div>
+        <div class="neofetch-row"><span class="k">Status</span><span class="v">Available untuk kolaborasi</span></div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section id="projects">
-  <div class="wrap">
+  <!-- ===================== PROJECTS ===================== -->
+  <section id="projects" class="wrap">
     <div class="section-head reveal">
-      <div class="section-tag">migrations</div>
-      <div class="section-title">Proyek yang sudah dijalankan ke produksi</div>
+      <span class="eyebrow">proyek unggulan</span>
+      <h2>Sistem yang sedang berjalan, bukan sekadar prototipe</h2>
+      <p>Beberapa nama instansi disamarkan demi privasi — tapi arsitektur dan tantangan teknisnya nyata.</p>
     </div>
-    <div class="projects" id="projects-list">
 
-      <div class="migration reveal">
-        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
-          <div>
-            <div class="migration-file">2026_01_00001_<span class="fn">create_simhap_system</span>.php</div>
-            <div class="migration-name">SIMHAP — Sistem Manajemen Habis Pakai</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="migration-badges">
-              <span class="badge">Laravel</span><span class="badge">Filament</span>
-            </div>
-            <span class="chevron">▸</span>
-          </div>
+    <div class="project-grid">
+      <article class="project-card reveal" data-tilt>
+        <span class="project-index">01</span>
+        <h3>Sistem Manajemen Barang Habis Pakai</h3>
+        <p>Panel admin untuk mencatat, meminta, dan menyetujui pemakaian barang habis pakai kantor, dengan riwayat stok yang otomatis ter-update dan bisa diaudit.</p>
+        <div class="project-tags">
+          <span class="tag">Laravel 12</span><span class="tag">Filament v4</span><span class="tag">MySQL</span><span class="tag">Observer</span><span class="tag">Spatie Activitylog</span>
         </div>
-        <div class="migration-body">
-          <div class="migration-body-inner">
-            <div class="row"><div class="label">Masalah</div>Pelacakan stok barang habis pakai dilakukan manual, rawan selisih dan sulit diaudit.</div>
-            <div class="row"><div class="label">Solusi</div>Ledger stok append-only dengan penghitung berbasis Observer dan <code style="color:var(--cyan)">lockForUpdate()</code> untuk mencegah race condition saat transaksi bersamaan.</div>
-            <div class="row"><div class="label">Detail teknis</div>10 tabel ternormalisasi, ULID untuk primary key transaksi, dibangun dalam roadmap 22 hari bertahap.</div>
-          </div>
-        </div>
-      </div>
+      </article>
 
-      <div class="migration reveal">
-        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
-          <div>
-            <div class="migration-file">2025_09_00014_<span class="fn">create_ppid_portal</span>.php</div>
-            <div class="migration-name">PPID Arpusda — Portal Informasi Publik</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="migration-badges">
-              <span class="badge">Filament v5</span><span class="badge">Security</span>
-            </div>
-            <span class="chevron">▸</span>
-          </div>
+      <article class="project-card reveal" data-tilt>
+        <span class="project-index">02</span>
+        <h3>Sistem Agenda & Kegiatan Instansi</h3>
+        <p>Aplikasi penjadwalan kegiatan dengan kontrol akses berbasis peran, sehingga setiap unit hanya melihat dan mengelola agenda yang relevan bagi mereka.</p>
+        <div class="project-tags">
+          <span class="tag">Laravel 12</span><span class="tag">Livewire v3</span><span class="tag">Filament</span><span class="tag">Spatie Permission</span>
         </div>
-        <div class="migration-body">
-          <div class="migration-body-inner">
-            <div class="row"><div class="label">Masalah</div>Permintaan informasi publik butuh alur yang transparan, aman dari penyalahgunaan, dan mudah diaudit.</div>
-            <div class="row"><div class="label">Solusi</div>Rate limiting, penomoran tiket anti-enumerasi (<code style="color:var(--cyan)">PPID-YYYY-XXXXXX</code>), CSP header, dan audit log berbasis IP di setiap pengajuan.</div>
-            <div class="row"><div class="label">Detail teknis</div>Dibangun dengan Filament v5, Spatie Media Library, dan bezhansalleh/filament-shield untuk kontrol akses granular.</div>
-          </div>
-        </div>
-      </div>
+      </article>
 
-      <div class="migration reveal">
-        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
-          <div>
-            <div class="migration-file">2025_06_00027_<span class="fn">create_agenda_arpus</span>.php</div>
-            <div class="migration-name">Agenda Arpus — Manajemen Kegiatan</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="migration-badges">
-              <span class="badge">Livewire v3</span><span class="badge">FullCalendar</span>
-            </div>
-            <span class="chevron">▸</span>
-          </div>
+      <article class="project-card reveal" data-tilt>
+        <span class="project-index">03</span>
+        <h3>Layanan Informasi Publik (PPID)</h3>
+        <p>Portal permohonan informasi publik untuk warga, lengkap dengan pelacakan status permohonan dan dashboard petugas untuk merespons secara terstruktur.</p>
+        <div class="project-tags">
+          <span class="tag">Laravel 12</span><span class="tag">Filament</span><span class="tag">Livewire v3</span><span class="tag">MySQL</span>
         </div>
-        <div class="migration-body">
-          <div class="migration-body-inner">
-            <div class="row"><div class="label">Masalah</div>Jadwal kegiatan antar bagian tersebar di banyak dokumen, sulit dipantau real-time.</div>
-            <div class="row"><div class="label">Solusi</div>Integrasi FullCalendar v6 dengan polling real-time dan strategi cache versioning agar tetap ringan meski data terus bertambah.</div>
-            <div class="row"><div class="label">Detail teknis</div>Optimasi Filament Shield lewat <code style="color:var(--cyan)">Gate::before()</code> dan pembersihan konfigurasi Tailwind untuk performa PageSpeed.</div>
-          </div>
-        </div>
-      </div>
+      </article>
 
-      <div class="migration reveal">
-        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
-          <div>
-            <div class="migration-file">2025_03_00009_<span class="fn">create_esilat_skor</span>.php</div>
-            <div class="migration-name">E-Silat Skor — Real-time Tournament Scoring</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="migration-badges">
-              <span class="badge">Laravel Reverb</span><span class="badge">WebSocket</span>
-            </div>
-            <span class="chevron">▸</span>
-          </div>
+      <article class="project-card reveal" data-tilt>
+        <span class="project-index">04</span>
+        <h3>Sistem Skor Turnamen Silat Real&#8209;time</h3>
+        <p>Papan skor pertandingan yang tersiar langsung ke layar arena via WebSocket — juri memasukkan nilai, penonton melihat perubahan skor seketika itu juga.</p>
+        <div class="project-tags">
+          <span class="tag">Laravel Reverb</span><span class="tag">WebSocket</span><span class="tag">Livewire v3</span><span class="tag">Service+Action</span>
         </div>
-        <div class="migration-body">
-          <div class="migration-body-inner">
-            <div class="row"><div class="label">Masalah</div>Penilaian pertandingan pencak silat manual rawan telat dan tidak sinkron antar juri.</div>
-            <div class="row"><div class="label">Solusi</div>Sistem skor real-time berbasis WebSocket sehingga setiap input juri langsung tersinkronisasi ke papan skor.</div>
-            <div class="row"><div class="label">Detail teknis</div>Dibangun dengan Laravel Reverb sebagai WebSocket server, tanpa dependensi layanan pihak ketiga.</div>
-          </div>
-        </div>
-      </div>
+      </article>
 
-      <div class="migration reveal">
-        <div class="migration-head" onclick="this.parentElement.classList.toggle('open')">
-          <div>
-            <div class="migration-file">2026_05_00002_<span class="fn">create_magang_management</span>.php</div>
-            <div class="migration-name">Manajemen Peserta Magang</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="migration-badges">
-              <span class="badge">Inertia + React</span><span class="badge">shadcn/ui</span>
-            </div>
-            <span class="chevron">▸</span>
-          </div>
+      <article class="project-card reveal" data-tilt>
+        <span class="project-index">05</span>
+        <h3>Eksplorasi Stack Modern</h3>
+        <p>Prototipe dashboard internal untuk menjajal kombinasi Inertia.js, React, dan shadcn/ui sebagai alternatif antarmuka di luar Livewire/Filament.</p>
+        <div class="project-tags">
+          <span class="tag">Inertia.js</span><span class="tag">React</span><span class="tag">shadcn/ui</span><span class="tag">TypeScript</span>
         </div>
-        <div class="migration-body">
-          <div class="migration-body-inner">
-            <div class="row"><div class="label">Masalah</div>Pendataan peserta magang dan penilaian masih tersebar di spreadsheet terpisah.</div>
-            <div class="row"><div class="label">Solusi</div>Aplikasi terpusat dengan arsitektur Request-Service-Controller penuh, policy berbasis peran, dan seeder untuk data awal.</div>
-            <div class="row"><div class="label">Detail teknis</div>Laravel 12 dengan stack Inertia.js + React + shadcn/ui — proyek eksplorasi pertama saya di luar Blade/Livewire.</div>
-          </div>
-        </div>
-      </div>
-
+      </article>
     </div>
-  </div>
-</section>
+  </section>
 
-<section id="skills">
-  <div class="wrap">
+  <!-- ===================== SKILLS ===================== -->
+  <section id="skills" class="wrap">
     <div class="section-head reveal">
-      <div class="section-tag">composer.json</div>
-      <div class="section-title">Tools yang dipakai sehari-hari</div>
+      <span class="eyebrow">skill & tech stack</span>
+      <h2>Peralatan yang saya pakai tiap hari</h2>
     </div>
-    <div class="skills-grid">
-      <div class="skill-pill reveal"><span class="cat">Backend</span><span class="list">Laravel 12, PHP 8.3+</span></div>
-      <div class="skill-pill reveal"><span class="cat">Admin Panel</span><span class="list">Filament v4 / v5</span></div>
-      <div class="skill-pill reveal"><span class="cat">Reactivity</span><span class="list">Livewire v3, Alpine.js</span></div>
-      <div class="skill-pill reveal"><span class="cat">SPA Stack</span><span class="list">Inertia.js, React, shadcn/ui</span></div>
-      <div class="skill-pill reveal"><span class="cat">Realtime</span><span class="list">Laravel Reverb, WebSocket</span></div>
-      <div class="skill-pill reveal"><span class="cat">Database</span><span class="list">MySQL, MariaDB, Redis</span></div>
-      <div class="skill-pill reveal"><span class="cat">Packages</span><span class="list">Spatie Permission, Activitylog</span></div>
-      <div class="skill-pill reveal"><span class="cat">Pattern</span><span class="list">Service+Action, Observer</span></div>
-      <div class="skill-pill reveal"><span class="cat">Deployment</span><span class="list">cPanel/LiteSpeed, Vite</span></div>
-    </div>
-  </div>
-</section>
 
-<section id="contact">
-  <div class="wrap">
-    <div class="contact-box reveal">
-      <h2>Ada sistem yang perlu dibangun?</h2>
-      <p>Terbuka untuk diskusi seputar Laravel, Filament, atau kolaborasi proyek pemerintahan digital.</p>
+    <div class="skills-groups">
+      <div class="skill-group reveal">
+        <h3>Backend</h3>
+        <div class="badge-row" data-stagger>
+          <span class="badge"><span class="swatch" style="background:var(--coral)"></span>Laravel 12</span>
+          <span class="badge"><span class="swatch" style="background:var(--sky)"></span>PHP 8.2+</span>
+          <span class="badge"><span class="swatch" style="background:var(--violet)"></span>Livewire v3</span>
+          <span class="badge"><span class="swatch" style="background:var(--amber)"></span>Filament v4 / v5</span>
+          <span class="badge"><span class="swatch" style="background:var(--mint)"></span>Laravel Reverb</span>
+        </div>
+      </div>
+
+      <div class="skill-group reveal">
+        <h3>Frontend & Eksplorasi</h3>
+        <div class="badge-row" data-stagger>
+          <span class="badge"><span class="swatch" style="background:var(--sky)"></span>Inertia.js</span>
+          <span class="badge"><span class="swatch" style="background:var(--coral)"></span>React</span>
+          <span class="badge"><span class="swatch" style="background:var(--violet)"></span>shadcn/ui</span>
+          <span class="badge"><span class="swatch" style="background:var(--amber)"></span>Alpine.js</span>
+          <span class="badge"><span class="swatch" style="background:var(--mint)"></span>Tailwind CSS</span>
+        </div>
+      </div>
+
+      <div class="skill-group reveal">
+        <h3>Data & Infrastruktur</h3>
+        <div class="badge-row" data-stagger>
+          <span class="badge"><span class="swatch" style="background:var(--sky)"></span>MySQL</span>
+          <span class="badge"><span class="swatch" style="background:var(--coral)"></span>Redis</span>
+          <span class="badge"><span class="swatch" style="background:var(--violet)"></span>Queue & Jobs</span>
+          <span class="badge"><span class="swatch" style="background:var(--amber)"></span>Git</span>
+        </div>
+      </div>
+
+      <div class="skill-group reveal">
+        <h3>Arsitektur & Kebiasaan Kerja</h3>
+        <div class="badge-row" data-stagger>
+          <span class="badge"><span class="swatch" style="background:var(--mint)"></span>Service + Action</span>
+          <span class="badge"><span class="swatch" style="background:var(--sky)"></span>Observer Pattern</span>
+          <span class="badge"><span class="swatch" style="background:var(--coral)"></span>Spatie Permission</span>
+          <span class="badge"><span class="swatch" style="background:var(--violet)"></span>Spatie Activitylog</span>
+          <span class="badge"><span class="swatch" style="background:var(--amber)"></span>RESTful API</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACT ===================== -->
+  <section id="contact" class="wrap" style="border-bottom:none;">
+    <div class="contact-panel reveal">
+      <div>
+        <span class="eyebrow">kontak</span>
+        <h2>Ada sistem yang perlu dibangun?</h2>
+        <p>Terbuka untuk diskusi kolaborasi, konsultasi arsitektur, atau sekadar ngobrol soal Laravel dan layanan publik digital.</p>
+        <div class="contact-prompt"><span class="prompt-accent">guest@portfolio</span>:~$ mailto <span class="caret" aria-hidden="true"></span></div>
+      </div>
       <div class="contact-links">
-        <a href="mailto:hasbunallahahmad93@gmail.com" class="btn btn-primary">✉ Kirim Email</a>
-        <a href="https://github.com/hasbunallahahmad" class="btn btn-ghost">GitHub</a>
-        <a href="https://api.whatsapp.com/send/?phone=6282241407907&text&type=phone_number&app_absent=0" class="btn btn-ghost">Whatsapp</a>
+        <a class="contact-link" href="mailto:nama@contoh.go.id">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <span><span class="label">Email</span><span class="value">nama@contoh.go.id</span></span>
+        </a>
+        <a class="contact-link" href="https://github.com/username" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          <span><span class="label">GitHub</span><span class="value">github.com/username</span></span>
+        </a>
+        <a class="contact-link" href="https://linkedin.com/in/username" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          <span><span class="label">LinkedIn</span><span class="value">linkedin.com/in/username</span></span>
+        </a>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+
+</main>
 
 <footer>
-  <div class="wrap">© 2026 Hasbun — built with Laravel-brain, shipped as static HTML.</div>
+  <p>Dibangun dengan <span class="heart">&#9829;</span> dan <code class="mono">php artisan serve</code> &mdash; &copy; 2026</p>
 </footer>
 
 <script>
-  // typing effect
-  const lines = [
-    'whoami',
-    'php artisan serve --project=hasbun-portfolio',
-    'echo "membangun sistem, bukan sekadar demo"'
-  ];
-  const el = document.getElementById('typeline');
-  let li = 0, ci = 0, deleting = false;
-  function type(){
-    const current = lines[li];
-    if(!deleting){
-      el.textContent = current.slice(0, ci+1);
-      ci++;
-      if(ci === current.length){ deleting = true; setTimeout(type, 1400); return; }
-    } else {
-      el.textContent = current.slice(0, ci-1);
-      ci--;
-      if(ci === 0){ deleting = false; li = (li+1) % lines.length; }
-    }
-    setTimeout(type, deleting ? 30 : 55);
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- THEME TOGGLE ---------- */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeToggle');
+  var saved = localStorage.getItem('portfolio-theme');
+  if(saved === 'light' || saved === 'dark'){
+    root.setAttribute('data-theme', saved);
   }
-  type();
-
-  // scroll reveal
-  const revealEls = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-  }, {threshold:.15});
-  revealEls.forEach(el=>io.observe(el));
-
-  // lifecycle node pulse-through on load + tooltips
-  const flowNodes = document.querySelectorAll('.node');
-  flowNodes.forEach(n=>{
-    const tip = document.createElement('div');
-    tip.className = 'tip';
-    tip.textContent = n.dataset.tip;
-    n.appendChild(tip);
+  function updateToggleState(){
+    var isLight = root.getAttribute('data-theme') === 'light';
+    themeBtn.setAttribute('aria-pressed', String(isLight));
+  }
+  updateToggleState();
+  themeBtn.addEventListener('click', function(){
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('portfolio-theme', next);
+    updateToggleState();
   });
-  let idx = 0;
-  function pulse(){
-    flowNodes.forEach(n=>n.classList.remove('active'));
-    flowNodes[idx].classList.add('active');
-    idx = (idx+1) % flowNodes.length;
-  }
-  setInterval(pulse, 900);
-  pulse();
 
-  // tilt effect on project migration cards
-  document.querySelectorAll('.migration').forEach(card=>{
-    card.addEventListener('mousemove', (e)=>{
-      const r = card.getBoundingClientRect();
-      const x = (e.clientX - r.left)/r.width - .5;
-      const y = (e.clientY - r.top)/r.height - .5;
-      card.style.transform = `perspective(800px) rotateY(${x*3}deg) rotateX(${-y*3}deg) translateY(-2px)`;
+  /* ---------- MOBILE NAV ---------- */
+  var mobileBtn = document.getElementById('mobileToggle');
+  var navLinks = document.getElementById('nav-links');
+  mobileBtn.addEventListener('click', function(){
+    var open = navLinks.classList.toggle('open');
+    mobileBtn.setAttribute('aria-expanded', String(open));
+  });
+  navLinks.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){
+      navLinks.classList.remove('open');
+      mobileBtn.setAttribute('aria-expanded', 'false');
     });
-    card.addEventListener('mouseleave', ()=>{ card.style.transform = ''; });
   });
+
+  /* ---------- SCROLL REVEAL ---------- */
+  var revealEls = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window && !reduceMotion){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry, i){
+        if(entry.isIntersecting){
+          var el = entry.target;
+          var delay = (Array.prototype.indexOf.call(revealEls, el) % 4) * 90;
+          setTimeout(function(){ el.classList.add('in-view'); }, delay);
+          io.unobserve(el);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in-view'); });
+  }
+
+  /* ---------- STAGGERED TECH BADGES ---------- */
+  var staggerGroups = document.querySelectorAll('[data-stagger]');
+  function activateStagger(group){
+    var badges = group.querySelectorAll('.badge');
+    badges.forEach(function(badge, i){
+      setTimeout(function(){ badge.classList.add('show'); }, i * 70);
+    });
+  }
+  if('IntersectionObserver' in window && !reduceMotion){
+    var staggerIO = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          activateStagger(entry.target);
+          staggerIO.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    staggerGroups.forEach(function(g){ staggerIO.observe(g); });
+  } else {
+    staggerGroups.forEach(function(g){ g.querySelectorAll('.badge').forEach(function(b){ b.classList.add('show'); }); });
+  }
+
+  /* ---------- PROJECT TAG STAGGER (on card reveal) ---------- */
+  var projectCards = document.querySelectorAll('.project-card');
+  if('IntersectionObserver' in window){
+    var tagIO = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var tags = entry.target.querySelectorAll('.tag');
+          tags.forEach(function(tag, i){
+            setTimeout(function(){ tag.classList.add('show'); }, i * 60);
+          });
+          tagIO.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+    projectCards.forEach(function(c){ tagIO.observe(c); });
+  } else {
+    document.querySelectorAll('.tag').forEach(function(t){ t.classList.add('show'); });
+  }
+
+  /* ---------- 3D TILT ON PROJECT CARDS ---------- */
+  if(!reduceMotion && matchMedia('(hover: hover)').matches){
+    projectCards.forEach(function(card){
+      var frame = null;
+      card.addEventListener('mousemove', function(e){
+        var rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var cx = rect.width / 2;
+        var cy = rect.height / 2;
+        var rotateX = ((y - cy) / cy) * -6;
+        var rotateY = ((x - cx) / cx) * 6;
+        if(frame) cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(function(){
+          card.style.transform = 'perspective(900px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateZ(6px)';
+        });
+      });
+      card.addEventListener('mouseleave', function(){
+        if(frame) cancelAnimationFrame(frame);
+        card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+      });
+    });
+  }
+
+  /* ---------- TYPEWRITER HERO CODE ---------- */
+  var tw = document.getElementById('typewriter');
+  var codeHTML =
+    '<span class="tk-kw">&lt;?php</span>\n\n' +
+    '<span class="tk-kw">class</span> <span class="tk-cls">Developer</span> <span class="tk-kw">extends</span> <span class="tk-cls">ASN</span> <span class="tk-kw">implements</span> <span class="tk-cls">BackendDeveloper</span>\n' +
+    '{\n' +
+    '    <span class="tk-kw">protected</span> <span class="tk-kw">array</span> <span class="tk-var">$stack</span> = [\n' +
+    '        <span class="tk-str">\'Laravel 12\'</span>, <span class="tk-str">\'Filament\'</span>,\n' +
+    '        <span class="tk-str">\'Livewire\'</span>, <span class="tk-str">\'Reverb\'</span>,\n' +
+    '    ];\n\n' +
+    '    <span class="tk-cmt">// pola kerja favorit</span>\n' +
+    '    <span class="tk-kw">protected</span> <span class="tk-kw">array</span> <span class="tk-var">$patterns</span> = [\n' +
+    '        <span class="tk-str">\'Service+Action\'</span>, <span class="tk-str">\'Observer\'</span>,\n' +
+    '    ];\n\n' +
+    '    <span class="tk-kw">public</span> <span class="tk-kw">function</span> <span class="tk-fn">currentFocus</span>(): <span class="tk-kw">string</span>\n' +
+    '    {\n' +
+    '        <span class="tk-kw">return</span> <span class="tk-str">\'Sistem untuk layanan publik\'</span>;\n' +
+    '    }\n' +
+    '}';
+
+  function typewrite(el, html, speed, done){
+    // strip tags to get plain-text length map, but we reveal by rendering
+    // progressively larger HTML substrings at safe tag boundaries.
+    var tokens = html.split(/(<[^>]+>)/g).filter(Boolean);
+    var i = 0;
+    var out = '';
+    function step(){
+      if(i >= tokens.length){ if(done) done(); return; }
+      var token = tokens[i];
+      if(token.charAt(0) === '<'){
+        out += token;
+        i++;
+        step();
+        return;
+      }
+      var charsPerTick = 2;
+      var chunk = token.slice(0, charsPerTick);
+      out += chunk;
+      tokens[i] = token.slice(charsPerTick);
+      if(tokens[i] === '') i++;
+      el.innerHTML = out + '<span class="caret" aria-hidden="true"></span>';
+      setTimeout(step, speed);
+    }
+    step();
+  }
+
+  if(reduceMotion){
+    tw.innerHTML = codeHTML + '<span class="caret" aria-hidden="true"></span>';
+  } else {
+    typewrite(tw, codeHTML, 14);
+  }
+})();
 </script>
 
 </body>
