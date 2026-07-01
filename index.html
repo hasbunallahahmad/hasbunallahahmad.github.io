@@ -412,6 +412,18 @@
   }
   .project-card h3{ font-size: 19px; }
   .project-card p{ color: var(--mist); font-size: 14.5px; }
+  .project-link{
+    display: inline-flex; align-items: center; gap: var(--sp-1);
+    font-family: var(--font-mono); font-size: 12.5px;
+    color: var(--coral);
+    width: fit-content;
+    padding-bottom: 1px;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--dur-2) var(--ease), gap var(--dur-2) var(--ease);
+  }
+  .project-link:hover{ border-color: var(--coral); gap: var(--sp-2); }
+  .project-link svg{ width: 13px; height: 13px; stroke: var(--coral); flex: none; transition: transform var(--dur-2) var(--ease); }
+  .project-link:hover svg{ transform: translate(2px, -2px); }
   .project-tags{ display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: auto; }
   .tag{
     font-family: var(--font-mono); font-size: 11px;
@@ -544,7 +556,7 @@
         <span class="role-pill">Service + Action Pattern</span>
       </div>
     </div>
-    
+
     <div class="terminal" role="img" aria-label="Cuplikan kode PHP yang menggambarkan profil developer">
       <div class="terminal-bar">
         <span class="terminal-dot red"></span>
@@ -573,12 +585,12 @@
           <div class="principle"><span class="dot"></span><span><b>Spatie Permission & Activitylog</b> — akses berbasis peran dan jejak audit yang bisa dipertanggungjawabkan.</span></div>
         </div>
       </div>
-    
+
       <div class="neofetch reveal">
         <div class="neofetch-header">
           <div class="avatar" aria-hidden="true"></div>
           <div>
-            <div class="name">Hasbunallahahmad@portfolio</div>
+            <div class="name">guest@portfolio</div>
             <div class="sub">Backend Developer / ASN</div>
           </div>
         </div>
@@ -615,8 +627,11 @@
       <article class="project-card reveal" data-tilt>
         <span class="project-index">02</span>
         <h3>Sistem Agenda & Kegiatan Instansi</h3>
-        <h4 href='https://agenda.bagorganisasi.semarangkota.go.id/'> Agenda Organisasi </h4>
         <p>Aplikasi penjadwalan kegiatan dengan kontrol akses berbasis peran, sehingga setiap unit hanya melihat dan mengelola agenda yang relevan bagi mereka.</p>
+        <a class="project-link" href="https://agenda.bagorganisasi.semarangkota.go.id/" target="_blank" rel="noopener noreferrer">
+          Lihat Project
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+        </a>
         <div class="project-tags">
           <span class="tag">Laravel 12</span><span class="tag">Livewire v3</span><span class="tag">Filament</span><span class="tag">Spatie Permission</span>
         </div>
@@ -714,13 +729,13 @@
         <div class="contact-prompt"><span class="prompt-accent">guest@portfolio</span>:~$ mailto <span class="caret" aria-hidden="true"></span></div>
       </div>
       <div class="contact-links">
-        <a class="contact-link" href="mailto:hasbunallahahmad93@gmail.com">
+        <a class="contact-link" href="mailto:nama@contoh.go.id">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-          <span><span class="label">Email</span><span class="value">hasbunallahahmad93@gmail.com</span></span>
+          <span><span class="label">Email</span><span class="value">nama@contoh.go.id</span></span>
         </a>
-        <a class="contact-link" href="https://github.com/hasbunallahahmad" target="_blank" rel="noopener noreferrer">
+        <a class="contact-link" href="https://github.com/username" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-          <span><span class="label">GitHub</span><span class="value">github.com/hasbunallahahmad</span></span>
+          <span><span class="label">GitHub</span><span class="value">github.com/username</span></span>
         </a>
         <a class="contact-link" href="https://api.whatsapp.com/send/?phone=6282241407907&text&type=phone_number&app_absent=0" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.6 6.32A8.86 8.86 0 0 0 3.16 16.53L2 21l4.6-1.17A8.85 8.85 0 0 0 21 12.14a8.8 8.8 0 0 0-3.4-5.82z"/><path d="M8.5 8.8c.15-.34.4-.34.63-.34.19 0 .38 0 .55.01.18.01.42-.07.66.5.24.58.83 2 .9 2.15.08.15.13.32.03.52-.1.2-.15.32-.3.5-.15.17-.3.38-.44.51-.15.14-.3.29-.13.57.16.27.72 1.19 1.55 1.93 1.06.95 1.96 1.24 2.24 1.38.28.14.44.12.6-.07.17-.2.7-.82.89-1.1.19-.28.37-.23.63-.14.26.1 1.65.78 1.94.92.28.14.47.21.54.33.07.12.07.68-.16 1.34-.23.65-1.35 1.27-1.86 1.31-.5.05-.98.24-3.31-.7-2.81-1.13-4.6-3.93-4.74-4.12-.14-.19-1.12-1.49-1.12-2.84 0-1.35.7-2.01.95-2.29z"/></svg>
