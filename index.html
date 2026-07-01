@@ -14,7 +14,7 @@
     --font-display: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
     --font-body: 'IBM Plex Sans', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-
+body{
     /* spacing (8pt grid) */
     --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-6: 24px;
     --sp-8: 32px; --sp-10: 40px; --sp-12: 48px; --sp-16: 64px; --sp-20: 80px; --sp-24: 96px;
@@ -78,7 +78,7 @@
     transition: background var(--dur-3) var(--ease), color var(--dur-3) var(--ease);
     background-image:
       radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
-    background-size: 28px 28px;
+    background-size: 36px 36px;
   }
 
   h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 600; margin: 0; letter-spacing: -0.01em; }
@@ -117,7 +117,7 @@
     padding: 0 var(--sp-6);
   }
 
-  section{ padding: var(--sp-24) 0; border-bottom: 1px solid var(--border); }
+  section{ padding: var(--sp-24) 0 var(--sp-20) 0; border-bottom: 1px solid var(--border); }
   section:last-of-type{ border-bottom: none; }
 
   .eyebrow{
@@ -127,7 +127,8 @@
     display: inline-flex;
     align-items: center;
     gap: var(--sp-2);
-    margin-bottom: var(--sp-4);
+    margin-top: var(--sp-4);
+    margin-bottom: var(--sp-6);
     letter-spacing: 0.02em;
   }
   .eyebrow::before{ content: "//"; color: var(--mist-dim); }
